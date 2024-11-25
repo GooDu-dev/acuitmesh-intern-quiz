@@ -21,6 +21,7 @@ func ConDB() {
 		customLog.Logging(utils.ERR_LOG, common.GetFunctionWithPackageName(), err)
 		return
 	} else {
+		db = db.Debug()
 		DB = db
 		customLog.Logging(utils.INFO_LOG, common.GetFunctionWithPackageName(), "Connect to database successfully")
 	}
