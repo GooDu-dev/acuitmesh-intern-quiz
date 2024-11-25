@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GooDu-dev/acuitmesh-intern-quiz/utils"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

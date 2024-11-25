@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	validator "github.com/GooDu-dev/acuitmesh-intern-quiz/src/v1/middlewares"
-	"github.com/GooDu-dev/acuitmesh-intern-quiz/src/v1/services/test"
-	"github.com/GooDu-dev/acuitmesh-intern-quiz/utils"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/api/test"
+	validator "github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/middlewares"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -49,12 +49,6 @@ func (r Router) InitRouter() http.Handler {
 
 	mainRoute := ro.Group(utils.PATH)
 	for _, e := range r.testService {
-		mainRoute.Handle(e.Method, e.Path, e.Validation, e.Endpoint)
-	}
-	for _, e := range r.searchService {
-		mainRoute.Handle(e.Method, e.Path, e.Validation, e.Endpoint)
-	}
-	for _, e := range r.mapService {
 		mainRoute.Handle(e.Method, e.Path, e.Validation, e.Endpoint)
 	}
 	return ro

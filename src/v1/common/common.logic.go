@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"runtime"
 
-	customError "github.com/GooDu-dev/acuitmesh-intern-quiz/utils/error"
+	customError "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/error"
 )
 
 func IsDefaultValueOrNil(data any) (output bool) {

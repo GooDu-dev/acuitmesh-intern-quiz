@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/GooDu-dev/acuitmesh-intern-quiz/utils/database"
-	customLog "github.com/GooDu-dev/acuitmesh-intern-quiz/utils/log"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/database"
+	customLog "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/log"
 	"github.com/joho/godotenv"
 )
 
@@ -13,7 +13,5 @@ func init() {
 }
 
 func main() {
-	database.DB.AutoMigrate(&database.BuildingModel{})
-	database.DB.AutoMigrate(&database.AreaModel{})
-	database.DB.AutoMigrate(&database.AreaTypeModel{})
+	// database.DB.AutoMigrate(&database.BuildingModel{})
 }

@@ -3,9 +3,9 @@ package middlewares
 import (
 	"strings"
 
-	"github.com/GooDu-dev/acuitmesh-intern-quiz/src/v1/common"
-	settings "github.com/GooDu-dev/acuitmesh-intern-quiz/utils"
-	customError "github.com/GooDu-dev/acuitmesh-intern-quiz/utils/error"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/common"
+	settings "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
+	customError "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/error"
 )
 
 type ValidatorService struct {

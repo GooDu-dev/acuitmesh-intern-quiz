@@ -8,10 +8,10 @@ import (
 	"syscall"
 
 	router "github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1"
-	"github.com/GooDu-dev/acuitmesh-intern-quiz/utils"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
 
-	"github.com/GooDu-dev/acuitmesh-intern-quiz/utils/database"
-	customLog "github.com/GooDu-dev/acuitmesh-intern-quiz/utils/log"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/database"
+	customLog "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/log"
 )
 
 func init() {

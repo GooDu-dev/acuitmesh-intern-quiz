@@ -3,7 +3,7 @@ package test
 import (
 	"net/http"
 
-	customError "github.com/GooDu-dev/acuitmesh-intern-quiz/utils/error"
+	customError "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/error"
 
 	"github.com/gin-gonic/gin"
 )

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/GooDu-dev/acuitmesh-intern-quiz/src/v1/common"
-	"github.com/GooDu-dev/acuitmesh-intern-quiz/utils"
-	customLog "github.com/GooDu-dev/acuitmesh-intern-quiz/utils/log"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/common"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
+	customLog "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

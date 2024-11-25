@@ -5,7 +5,7 @@ import (
 
 	"github.com/joho/godotenv"
 
-	customError "github.com/GooDu-dev/acuitmesh-intern-quiz/utils/error"
+	customError "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/error"
 )
 
 var (
