@@ -13,5 +13,7 @@ func init() {
 }
 
 func main() {
-	// database.DB.AutoMigrate(&database.BuildingModel{})
+	database.DB.AutoMigrate(&database.UserModel{})
+	database.DB.AutoMigrate(&database.HistoryModel{})
+	database.DB.AutoMigrate(&database.InvitationModel{})
 }
