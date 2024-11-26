@@ -58,6 +58,14 @@ func (r Router) InitRouter() http.Handler {
 			Validation:  validator.NoValidation,
 			Endpoint:    userEndpoint.GetUsersList,
 		},
+		{
+			Name:        "[GET] Get user statistic and history match",
+			Description: "get user statistic and 20 each list of history match",
+			Method:      http.MethodGet,
+			Path:        "/user/dashboard",
+			Validation:  validator.NoValidation,
+			Endpoint:    userEndpoint.GetUserDashboard,
+		},
 	}
 
 	ro := gin.Default()

@@ -57,3 +57,25 @@ func (e *UserEndpoint) GetUsersList(c *gin.Context) {
 	log.Logging(utils.INFO_LOG, common.GetFunctionWithPackageName(), response)
 	c.JSON(http.StatusOK, response)
 }
+
+func (e *UserEndpoint) GetUserDashboard(c *gin.Context) {
+
+	_id := c.Query("uid")
+	id, err := strconv.Atoi(_id)
+	if err != nil {
+		status, res := customError.GetErrorResponse(err)
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		c.JSON(status, res)
+		return
+	}
+
+	var response *UserHistoryResponse
+	if response, err = e.Service.GetUserDashboard(id); err != nil {
+		status, res := customError.GetErrorResponse(err)
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		c.JSON(status, res)
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
