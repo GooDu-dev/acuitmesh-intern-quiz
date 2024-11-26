@@ -5,6 +5,7 @@ const (
 	CONTENT_CODE   string = "X-Content-Code"
 	ACCESS_CONTROL string = "X-Access-Ctrl"
 	SOURCE_CONTROL string = "X-Source"
+	CLIENT_VERSION string = "X-Client-Version"
 
 	PATH        string = "/api"
 	SERVER_PORT string = ":8080"

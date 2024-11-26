@@ -9,6 +9,7 @@ type UserModel struct {
 	Lose     uint   `json:"loses"`
 	Draw     uint   `json:"draws"`
 	Total    uint   `json:"total"`
+	Mail     string `json:"mail" gorm:"uniqueIndex"`
 }
 
 func (UserModel) TableName() string {

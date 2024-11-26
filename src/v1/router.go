@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/api/test"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/api/user"
 	validator "github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/middlewares"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
 
@@ -23,6 +24,7 @@ type route struct {
 
 type Router struct {
 	testService []route
+	userService []route
 }
 
 func (r Router) InitRouter() http.Handler {
@@ -38,6 +40,34 @@ func (r Router) InitRouter() http.Handler {
 		},
 	}
 
+	userEndpoint := user.NewEndpoint()
+	r.userService = []route{
+		{
+			Name:        "[GET] Health Check",
+			Description: "user service health check",
+			Method:      http.MethodGet,
+			Path:        "/user/health",
+			Validation:  validator.NoValidation,
+			Endpoint:    userEndpoint.GetUserHealth,
+		},
+		{
+			Name:        "[GET] Get users list",
+			Description: "get 50 users per list, get start index from params",
+			Method:      http.MethodGet,
+			Path:        "/users",
+			Validation:  validator.NoValidation,
+			Endpoint:    userEndpoint.GetUsersList,
+		},
+		{
+			Name:        "[GET] Get user statistic and history match",
+			Description: "get user statistic and 20 each list of history match",
+			Method:      http.MethodGet,
+			Path:        "/user/dashboard",
+			Validation:  validator.NoValidation,
+			Endpoint:    userEndpoint.GetUserDashboard,
+		},
+	}
+
 	ro := gin.Default()
 	ro.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
@@ -49,6 +79,9 @@ func (r Router) InitRouter() http.Handler {
 
 	mainRoute := ro.Group(utils.PATH)
 	for _, e := range r.testService {
+		mainRoute.Handle(e.Method, e.Path, e.Validation, e.Endpoint)
+	}
+	for _, e := range r.userService {
 		mainRoute.Handle(e.Method, e.Path, e.Validation, e.Endpoint)
 	}
 	return ro
