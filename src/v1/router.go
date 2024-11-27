@@ -66,6 +66,22 @@ func (r Router) InitRouter() http.Handler {
 			Validation:  validator.NoValidation,
 			Endpoint:    userEndpoint.GetUserDashboard,
 		},
+		{
+			Name:        "[POST] User login with email and password",
+			Description: "use email and password to login and return id and username back",
+			Method:      http.MethodPost,
+			Path:        "/auth/login",
+			Validation:  validator.NoValidation,
+			Endpoint:    userEndpoint.LoginUser,
+		},
+		{
+			Name:        "[POST] User register with email, username, password",
+			Description: "use email, username and password to register and return id and username back",
+			Method:      http.MethodPost,
+			Path:        "/auth/register",
+			Validation:  validator.NoValidation,
+			Endpoint:    userEndpoint.CreateUser,
+		},
 	}
 
 	ro := gin.Default()

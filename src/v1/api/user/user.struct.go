@@ -1,5 +1,7 @@
 package user
 
+import "time"
+
 type UsersListResponse struct {
 	ID       int    `json:"uid" gorm:"column:id"`
 	Username string `json:"username" gorm:"column:username"`
@@ -34,4 +36,23 @@ type HistoryMath struct {
 type UserCard struct {
 	ID       int    `json:"uid" gorm:"column:id"`
 	Username string `json:"username" gorm:"username"`
+}
+
+type UserLoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"pwd"`
+}
+
+type UserRegisterRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Pwd      string `json:"pwd"`
+}
+
+type UserCreateStruct struct {
+	ID        int       `json:"id" gorm:"column:id"`
+	Username  string    `json:"username" gorm:"column:username"`
+	Email     string    `json:"email" gorm:"column:mail"`
+	Pwd       string    `json:"pwd" gorm:"column:pwd"`
+	CreatedAt time.Time `json:"create_at" gorm:"column:created_at"`
 }
