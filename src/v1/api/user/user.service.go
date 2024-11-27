@@ -22,7 +22,7 @@ func (s *UserService) GetUserList(start int) (response *[]UsersListResponse, err
 
 	if start < 0 {
 		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), map[string]int{"start": start})
-		return nil, customError.InvalidRequestError
+		return nil, customError.BadRequestError
 	}
 
 	if response, err = s.Model.GetUsersList(start); err != nil {
@@ -37,7 +37,7 @@ func (s *UserService) GetUserStatistic(id int) (response *UserStatistic, err err
 
 	if id < 0 {
 		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), "id < 0")
-		return nil, customError.InvalidRequestError
+		return nil, customError.BadRequestError
 	}
 
 	if response, err = s.Model.GetUserStatistic(id); err != nil {
@@ -52,7 +52,7 @@ func (s *UserService) GetUserHistoryMatch(id int) (response *[]HistoryMath, err 
 
 	if id < 0 {
 		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), "id < 0")
-		return nil, customError.InvalidRequestError
+		return nil, customError.BadRequestError
 	}
 
 	if response, err = s.Model.GetUserHistoryMatch(id); err != nil {
@@ -67,7 +67,7 @@ func (s *UserService) GetUserDashboard(id int) (response *UserHistoryResponse, e
 
 	if id < 0 {
 		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
-		return nil, customError.InvalidRequestError
+		return nil, customError.BadRequestError
 	}
 
 	var stat *UserStatistic
@@ -91,4 +91,48 @@ func (s *UserService) GetUserDashboard(id int) (response *UserHistoryResponse, e
 
 	return response, nil
 
+}
+
+func (s *UserService) LoginUser(request UserLoginRequest) (userCard *UserCard, err error) {
+
+	if !common.IsValidEmail(request.Email) {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), map[string]string{"email": request.Email})
+		return nil, customError.BadRequestError
+	}
+
+	pwd, err := common.UserEncrypt(request.Password)
+	if err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, customError.InternalServerError
+	}
+
+	userCard, err = s.Model.LoginUser(request.Email, pwd)
+	if err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	return userCard, nil
+
+}
+
+func (s *UserService) CreateUser(request UserRegisterRequest) (userCard *UserCard, err error) {
+
+	if !common.IsValidEmail(request.Email) {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), map[string]string{"email": request.Email})
+		return nil, customError.BadRequestError
+	}
+
+	pwd, err := common.UserEncrypt(request.Pwd)
+	if err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, customError.InternalServerError
+	}
+
+	if userCard, err = s.Model.CreateUser(request.Email, request.Username, pwd); err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	return userCard, nil
 }

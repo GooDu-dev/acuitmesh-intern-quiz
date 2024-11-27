@@ -1,6 +1,8 @@
 package user
 
 import (
+	"time"
+
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/common"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/database"
@@ -111,5 +113,64 @@ func (m *UserModel) GetUserHistoryMatch(user_id int) (*[]HistoryMath, error) {
 	}
 
 	return &response, nil
+
+}
+
+func (m *UserModel) LoginUser(email string, pwd string) (*UserCard, error) {
+
+	var user []UserCard
+
+	result := database.DB.Table("tb_user").
+		Select(
+			"tb_user.id",
+			"tb_user.username",
+		).
+		Where("tb_user.mail = ? AND tb_user.pwd = ?", email, pwd).
+		Find(&user)
+
+	if result.Error != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return nil, customError.InternalServerError
+	}
+	if len(user) == 0 {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), user)
+		return nil, customError.UserNotFound
+	}
+	if len(user) > 1 {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), user)
+		return nil, customError.InternalServerError
+	}
+
+	return &user[0], nil
+}
+
+func (m *UserModel) CreateUser(email string, username string, pwd string) (*UserCard, error) {
+
+	user := UserCreateStruct{
+		Username:  username,
+		Email:     email,
+		Pwd:       pwd,
+		CreatedAt: time.Now(),
+	}
+
+	result := database.DB.Table("tb_user").
+		Select("username", "mail", "pwd", "created_at").
+		Create(&user)
+
+	if result.Error != nil {
+		if common.IsPostgresqlDataDup(result.Error) {
+			log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), "data dupplicated")
+			return nil, customError.UserAccountDupplicated
+		}
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return nil, customError.InternalServerError
+	}
+
+	userCard := UserCard{
+		ID:       int(user.ID),
+		Username: user.Username,
+	}
+
+	return &userCard, nil
 
 }

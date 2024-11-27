@@ -1,5 +1,14 @@
 package common
 
-func DevfleEncrypt(text string, key []byte) (encrypt string, err error) {
-	return "", nil
+import (
+	"crypto/sha256"
+	"encoding/hex"
+)
+
+func UserEncrypt(text string) (encrypt string, err error) {
+	hash := sha256.Sum256([]byte(text))
+
+	encrypt = hex.EncodeToString(hash[:])
+
+	return encrypt, nil
 }

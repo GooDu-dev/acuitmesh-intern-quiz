@@ -119,6 +119,9 @@ var (
 	FieldContainsNilOrDefaultValueError CustomError = New("field_contains_nil_or_default_value_error")
 	InvalidHeaderNotAcceptableError     CustomError = New("invalid_header_request_error")
 	ContentNotFoundError                CustomError = New("content_in_database_not_found_error")
+	// User
+	UserNotFound           CustomError = New("user_not_found")
+	UserAccountDupplicated CustomError = New("user_account_dupplicated")
 )
 var ErrorCode = map[error]string{
 	// Normal - 1
@@ -137,6 +140,9 @@ var ErrorCode = map[error]string{
 	FieldContainsNilOrDefaultValueError: "10012",
 	InvalidHeaderNotAcceptableError:     "10013",
 	ContentNotFoundError:                "10014",
+	// User - 2
+	UserNotFound:           "20000",
+	UserAccountDupplicated: "20001",
 }
 var ErrorThMessage = map[error]string{
 	// Normarl - 1
@@ -155,6 +161,9 @@ var ErrorThMessage = map[error]string{
 	FieldContainsNilOrDefaultValueError: "ข้อมูลในฟิลล์ไม่มีค่าหรือเป็นค่าเริ่มต้น, โปรดลองใหม่อีกครั้ง",
 	InvalidHeaderNotAcceptableError:     "ข้อมูลใน header ไม่ตรงตามเงื่อนไขของเว็บไซต์, โปรดลองใหม่อีกครั้ง",
 	ContentNotFoundError:                "ไม่พบข้อมูลในฐานข้อมูล, โปรดลองใหม่อีกครั้ง",
+	// User - 2
+	UserNotFound:           "ไม่พบรายชื่อบัญชีผู้ใช้, โปรดลองใหม่อีกครั้ง",
+	UserAccountDupplicated: "ชื่อผู้ใช้หรืออีเมลได้ถูกลงทะเบียนไว้แล้ว, กรุณาลองใหม่อีกครั้ง",
 }
 var ErrorEnMessage = map[error]string{
 	// Normal - 1
@@ -173,6 +182,9 @@ var ErrorEnMessage = map[error]string{
 	FieldContainsNilOrDefaultValueError: "Fields contain nil or default value, please try again.",
 	InvalidHeaderNotAcceptableError:     "Invalud header request is not acceptable, please try again later",
 	ContentNotFoundError:                "Missing content in database, please try again later",
+	// User - 2
+	UserNotFound:           "An account is not found, please try again later",
+	UserAccountDupplicated: "An username or email is already used, please try again later",
 }
 var HttpStatusCodes = map[error]int{
 	// Normal - 1
@@ -191,4 +203,7 @@ var HttpStatusCodes = map[error]int{
 	FieldContainsNilOrDefaultValueError: 400,
 	InvalidHeaderNotAcceptableError:     406,
 	ContentNotFoundError:                404,
+	// User - 2
+	UserNotFound:           404,
+	UserAccountDupplicated: 400,
 }
