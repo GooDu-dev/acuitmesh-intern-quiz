@@ -1,11 +1,14 @@
 package common
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"runtime"
 
 	customError "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/error"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func IsDefaultValueOrNil(data any) (output bool) {
@@ -76,4 +79,18 @@ func splitFunctionName(funcName string) (packageName string, functionName string
 		}
 	}
 	return packageName, functionName
+}
+
+func IsValidEmail(email string) bool {
+	regex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	re := regexp.MustCompile(regex)
+	return re.MatchString(email)
+}
+
+func IsPostgresqlDataDup(err error) bool {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505" // postgresql unique error for dupp data
+	}
+	return false
 }
