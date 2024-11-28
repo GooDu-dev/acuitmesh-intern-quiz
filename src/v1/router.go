@@ -55,7 +55,7 @@ func (r Router) InitRouter() http.Handler {
 			Description: "get 50 users per list, get start index from params",
 			Method:      http.MethodGet,
 			Path:        "/users",
-			Validation:  validator.NoValidation,
+			Validation:  validator.AuthValidator,
 			Endpoint:    userEndpoint.GetUsersList,
 		},
 		{
@@ -63,7 +63,7 @@ func (r Router) InitRouter() http.Handler {
 			Description: "get user statistic and 20 each list of history match",
 			Method:      http.MethodGet,
 			Path:        "/user/dashboard",
-			Validation:  validator.NoValidation,
+			Validation:  validator.AuthValidator,
 			Endpoint:    userEndpoint.GetUserDashboard,
 		},
 		{

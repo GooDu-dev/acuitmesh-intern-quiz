@@ -120,8 +120,9 @@ var (
 	InvalidHeaderNotAcceptableError     CustomError = New("invalid_header_request_error")
 	ContentNotFoundError                CustomError = New("content_in_database_not_found_error")
 	// User
-	UserNotFound           CustomError = New("user_not_found")
-	UserAccountDupplicated CustomError = New("user_account_dupplicated")
+	UserNotFoundError           CustomError = New("user_not_found")
+	UserAccountDupplicatedError CustomError = New("user_account_dupplicated")
+	UserTokenExpiredError       CustomError = New("user_token_expired_error")
 )
 var ErrorCode = map[error]string{
 	// Normal - 1
@@ -141,8 +142,9 @@ var ErrorCode = map[error]string{
 	InvalidHeaderNotAcceptableError:     "10013",
 	ContentNotFoundError:                "10014",
 	// User - 2
-	UserNotFound:           "20000",
-	UserAccountDupplicated: "20001",
+	UserNotFoundError:           "20000",
+	UserAccountDupplicatedError: "20001",
+	UserTokenExpiredError:       "20002",
 }
 var ErrorThMessage = map[error]string{
 	// Normarl - 1
@@ -162,8 +164,9 @@ var ErrorThMessage = map[error]string{
 	InvalidHeaderNotAcceptableError:     "ข้อมูลใน header ไม่ตรงตามเงื่อนไขของเว็บไซต์, โปรดลองใหม่อีกครั้ง",
 	ContentNotFoundError:                "ไม่พบข้อมูลในฐานข้อมูล, โปรดลองใหม่อีกครั้ง",
 	// User - 2
-	UserNotFound:           "ไม่พบรายชื่อบัญชีผู้ใช้, โปรดลองใหม่อีกครั้ง",
-	UserAccountDupplicated: "ชื่อผู้ใช้หรืออีเมลได้ถูกลงทะเบียนไว้แล้ว, กรุณาลองใหม่อีกครั้ง",
+	UserNotFoundError:           "ไม่พบรายชื่อบัญชีผู้ใช้, โปรดลองใหม่อีกครั้ง",
+	UserAccountDupplicatedError: "ชื่อผู้ใช้หรืออีเมลได้ถูกลงทะเบียนไว้แล้ว, กรุณาลองใหม่อีกครั้ง",
+	UserTokenExpiredError:       "โทเคนของผู้ใช้หมดอายุ, กรุณาลงทะเบียนใหม่อีกครั้ง",
 }
 var ErrorEnMessage = map[error]string{
 	// Normal - 1
@@ -183,8 +186,9 @@ var ErrorEnMessage = map[error]string{
 	InvalidHeaderNotAcceptableError:     "Invalud header request is not acceptable, please try again later",
 	ContentNotFoundError:                "Missing content in database, please try again later",
 	// User - 2
-	UserNotFound:           "An account is not found, please try again later",
-	UserAccountDupplicated: "An username or email is already used, please try again later",
+	UserNotFoundError:           "An account is not found, please try again later",
+	UserAccountDupplicatedError: "An username or email is already used, please try again later",
+	UserTokenExpiredError:       "User token is expired, please login again later",
 }
 var HttpStatusCodes = map[error]int{
 	// Normal - 1
@@ -204,6 +208,7 @@ var HttpStatusCodes = map[error]int{
 	InvalidHeaderNotAcceptableError:     406,
 	ContentNotFoundError:                404,
 	// User - 2
-	UserNotFound:           404,
-	UserAccountDupplicated: 400,
+	UserNotFoundError:           404,
+	UserAccountDupplicatedError: 400,
+	UserTokenExpiredError:       401,
 }

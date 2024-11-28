@@ -1,11 +1,14 @@
 package common
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
 	"runtime"
+	"time"
 
 	customError "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/error"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -93,4 +96,39 @@ func IsPostgresqlDataDup(err error) bool {
 		return pgErr.Code == "23505" // postgresql unique error for dupp data
 	}
 	return false
+}
+
+func GenerateToken(size int) (string, error) {
+	// Generate 16 random bytes (for good entropy)
+	randomBytes := make([]byte, 16)
+	_, err := rand.Read(randomBytes)
+	if err != nil {
+		return "", customError.InternalServerError
+	}
+
+	// Optionally, you can append the current timestamp or a UUID to ensure uniqueness
+	timestamp := []byte(fmt.Sprintf("%d", time.Now().UnixNano())) // Using nanoseconds as timestamp
+	uniqueBytes := append(randomBytes, timestamp...)              // Combine random bytes and timestamp
+
+	// Alternatively, you can use a UUID for uniqueness
+	// uuidBytes := uuid.New().Bytes()
+	// uniqueBytes := append(randomBytes, uuidBytes...)
+
+	// Generate a base64-encoded string
+	token := base64.URLEncoding.EncodeToString(uniqueBytes)
+
+	// Ensure the token is exactly 'size' characters long
+	if len(token) > size {
+		token = token[:size]
+	} else if len(token) < size {
+		// If the token is shorter than the required size, pad it
+		padding := make([]byte, size-len(token))
+		token = token + base64.URLEncoding.EncodeToString(padding)
+	}
+
+	return token, nil
+}
+
+func CompareTimeIsPassed(t1 time.Time, minute int) bool {
+	return time.Duration(time.Since(t1).Hours()) > (time.Duration(minute) * time.Minute)
 }
