@@ -1,7 +1,11 @@
 package middlewares
 
 import (
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/api/user"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/common"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
+	customError "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/error"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/log"
 	"github.com/gin-gonic/gin"
 )
 
@@ -9,38 +13,53 @@ func NoValidation(context *gin.Context) {
 
 }
 
-func CheckBasicHeader(context *gin.Context) (err error) {
-	header := HeaderRequest{
-		ContentType:   context.GetHeader(utils.CONTENT_TYPE),
-		ContentCode:   context.GetHeader(utils.CONTENT_CODE),
-		ClientVersion: context.GetHeader(utils.CLIENT_VERSION),
-		AccessCtrl:    context.GetHeader(utils.ACCESS_CONTROL),
-		SourceCtrl:    context.GetHeader(utils.SOURCE_CONTROL),
+func AuthValidator(context *gin.Context) {
+	token, err := context.Cookie("auth-token")
+	log.Logging(utils.INFO_LOG, common.GetFunctionWithPackageName(),
+		map[string]interface{}{
+			"token":   token,
+			"err":     err,
+			"cookies": context.Request.Header,
+		})
+	if err != nil {
+		status, res := customError.InvalidHeaderNotAcceptableError.ErrorResponse()
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err.Error())
+		context.JSON(status, res)
+		context.Abort()
+		return
 	}
-	validator := ValidatorService{
-		BasicHeader: header,
-		UserHeader:  UserHeaderRequest{},
+	if common.IsDefaultValueOrNil(token) {
+		status, res := customError.MissingRequestError.ErrorResponse()
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), map[string]string{"token": token})
+		context.JSON(status, res)
+		context.Abort()
+		return
 	}
+	userModel := user.UserModel{}
 
-	if err = validator.BasicHeader.CheckContentType(); err != nil {
-		return err
+	userCard, err := userModel.CheckUserToken(token)
+	if err != nil {
+		status, res := customError.GetErrorResponse(err)
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		context.JSON(status, res)
+		context.Abort()
+		return
 	}
-
-	if err = validator.BasicHeader.CheckContentCode(); err != nil {
-		return err
+	if common.CompareTimeIsPassed(userCard.ExpiredAt, 60*24) {
+		err := userModel.ExpireUserToken(userCard.ID, userCard.Token)
+		if err != nil {
+			status, res := customError.GetErrorResponse(err)
+			log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+			context.JSON(status, res)
+			context.Abort()
+			return
+		}
+		status, res := customError.UserTokenExpiredError.ErrorResponse()
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), map[string]interface{}{"userCard": userCard})
+		context.JSON(status, res)
+		context.Abort()
+		return
 	}
-
-	if _, err = validator.BasicHeader.CheckClientVersion(); err != nil {
-		return err
-	}
-
-	if err = validator.BasicHeader.CheckAccessCtrl(); err != nil {
-		return err
-	}
-
-	if err = validator.BasicHeader.CheckSourceCtrl(); err != nil {
-		return err
-	}
-
-	return nil
+	// go to endpoint
+	context.Next()
 }
