@@ -112,6 +112,32 @@ func (s *UserService) LoginUser(request UserLoginRequest) (userCard *UserCard, e
 		return nil, err
 	}
 
+	if common.IsDefaultValueOrNil(userCard.Token) {
+		// no token found
+		token, err := s.Model.CreateUserToken(userCard.ID)
+		if err != nil {
+			log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+			return nil, err
+		}
+		userCard.Token = token.Token
+		userCard.ExpiredAt = token.ExpiredAt
+
+	} else if common.CompareTimeIsPassed(userCard.ExpiredAt, 60*24) {
+		// token found but expired
+		err := s.Model.ExpireUserToken(userCard.ID, userCard.Token)
+		if err != nil {
+			log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+			return nil, err
+		}
+		token, err := s.Model.CreateUserToken(userCard.ID)
+		if err != nil {
+			log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+			return nil, err
+		}
+		userCard.Token = token.Token
+		userCard.ExpiredAt = token.ExpiredAt
+	}
+
 	return userCard, nil
 
 }

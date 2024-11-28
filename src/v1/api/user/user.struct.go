@@ -34,8 +34,10 @@ type HistoryMath struct {
 }
 
 type UserCard struct {
-	ID       int    `json:"uid" gorm:"column:id"`
-	Username string `json:"username" gorm:"username"`
+	ID        int       `json:"uid" gorm:"column:id"`
+	Username  string    `json:"username" gorm:"column:username"`
+	Token     string    `json:"token" gorm:"column:token"`
+	ExpiredAt time.Time `json:"expired_at" gorm:"column:expired_at"`
 }
 
 type UserLoginRequest struct {
@@ -55,4 +57,11 @@ type UserCreateStruct struct {
 	Email     string    `json:"email" gorm:"column:mail"`
 	Pwd       string    `json:"pwd" gorm:"column:pwd"`
 	CreatedAt time.Time `json:"create_at" gorm:"column:created_at"`
+}
+
+type UserTokenStruct struct {
+	UserID    int       `json:"user_id" gorm:"column:user_id"`
+	Token     string    `json:"token" gorm:"column:token"`
+	ExpiredAt time.Time `json:"expired_at" gorm:"column:expired_at"`
+	OnUsed    string    `json:"on_used" gorm:"on_used"`
 }

@@ -118,13 +118,17 @@ func (m *UserModel) GetUserHistoryMatch(user_id int) (*[]HistoryMath, error) {
 
 func (m *UserModel) LoginUser(email string, pwd string) (*UserCard, error) {
 
-	var user []UserCard
+	var user UserCard
 
 	result := database.DB.Table("tb_user").
 		Select(
 			"tb_user.id",
 			"tb_user.username",
+			"tb_user_token.token",
+			"tb_user_token.on_used",
+			"tb_user_token.expired_at",
 		).
+		Joins("LEFT JOIN tb_user_token ON tb_user.id = tb_user_token.user_id AND tb_user_token.on_used = 'A'").
 		Where("tb_user.mail = ? AND tb_user.pwd = ?", email, pwd).
 		Find(&user)
 
@@ -132,16 +136,12 @@ func (m *UserModel) LoginUser(email string, pwd string) (*UserCard, error) {
 		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
 		return nil, customError.InternalServerError
 	}
-	if len(user) == 0 {
+	if common.IsDefaultValueOrNil(user.ID) {
 		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), user)
-		return nil, customError.UserNotFound
-	}
-	if len(user) > 1 {
-		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), user)
-		return nil, customError.InternalServerError
+		return nil, customError.UserNotFoundError
 	}
 
-	return &user[0], nil
+	return &user, nil
 }
 
 func (m *UserModel) CreateUser(email string, username string, pwd string) (*UserCard, error) {
@@ -160,7 +160,7 @@ func (m *UserModel) CreateUser(email string, username string, pwd string) (*User
 	if result.Error != nil {
 		if common.IsPostgresqlDataDup(result.Error) {
 			log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), "data dupplicated")
-			return nil, customError.UserAccountDupplicated
+			return nil, customError.UserAccountDupplicatedError
 		}
 		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
 		return nil, customError.InternalServerError
@@ -173,4 +173,73 @@ func (m *UserModel) CreateUser(email string, username string, pwd string) (*User
 
 	return &userCard, nil
 
+}
+
+func (m *UserModel) CheckUserToken(token string) (*UserCard, error) {
+
+	var userCard UserCard
+
+	result := database.DB.Table("tb_user").
+		Select(
+			"tb_user.id",
+			"tb_user.username",
+			"tb_user_token.token",
+			"tb_user_token.expired_at",
+		).
+		Joins("LEFT JOIN tb_user_token ON tb_user.id = tb_user_token.user_id AND tb_user_token.on_used = 'A'").
+		Where("tb_user_token.token = ?", token).
+		First(&userCard)
+
+	if result.Error != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return nil, customError.InternalServerError
+	}
+
+	return &userCard, nil
+}
+
+func (m *UserModel) CreateUserToken(user_id int) (*UserTokenStruct, error) {
+
+	tk, err := common.GenerateToken(32)
+	if err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	token := UserTokenStruct{
+		UserID:    user_id,
+		ExpiredAt: time.Now().Add(24 * time.Hour),
+		Token:     tk,
+		OnUsed:    "A",
+	}
+
+	result := database.DB.Table("tb_user_token").
+		Select(
+			"tb_user_token.user_id",
+			"tb_user_token.expired_at",
+			"tb_user_token.token",
+			"tb_user_token.on_used",
+		).
+		Create(&token)
+
+	if result.Error != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return nil, customError.InternalServerError
+	}
+
+	return &token, nil
+}
+
+func (m *UserModel) ExpireUserToken(user_id int, token string) error {
+
+	result := database.DB.Table("tb_user_token").
+		Where("tb_user_token.user_id = ? AND tb_user_token.token = ?", user_id, token).
+		Update("tb_user_token.on_used", 'N')
+
+	if result.Error != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return customError.InternalServerError
+	}
+
+	return nil
 }
