@@ -15,6 +15,7 @@ type InvitationModel struct {
 	HomeFK           UserModel `gorm:"foreignKey:HomeID"`
 	AwayID           uint      `json:"away_id"`
 	AwayFK           UserModel `gorm:"foreignKey:AwayID"`
+	Token            string    `json:"token" gorm:"column:token; index"`
 }
 
 func (InvitationModel) TableName() string {
