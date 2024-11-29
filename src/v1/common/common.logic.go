@@ -8,9 +8,13 @@ import (
 	"reflect"
 	"regexp"
 	"runtime"
+	"strconv"
+	"strings"
 	"time"
 
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
 	customError "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/error"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/log"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -131,4 +135,27 @@ func GenerateToken(size int) (string, error) {
 
 func CompareTimeIsPassed(t1 time.Time, minute int) bool {
 	return time.Duration(time.Since(t1).Hours()) > (time.Duration(minute) * time.Minute)
+}
+
+func IntArrayToString(arr []int) string {
+	strArray := make([]string, len(arr))
+	for i, num := range arr {
+		strArray[i] = strconv.Itoa(num) // Convert int to string
+	}
+	return strings.Join(strArray, ",") // Join with commas
+}
+
+func StringToIntArray(str string) ([]int, error) {
+	strArray := strings.Split(str, ",") // Split by commas
+	arr := make([]int, len(strArray))   // Create a slice to hold the integers
+
+	for i, numStr := range strArray {
+		num, err := strconv.Atoi(numStr) // Convert string to int
+		if err != nil {
+			log.Logging(utils.EXCEPTION_LOG, GetFunctionWithPackageName(), map[string]interface{}{"num": num, "err": err})
+			return nil, customError.InternalServerError
+		}
+		arr[i] = num
+	}
+	return arr, nil
 }

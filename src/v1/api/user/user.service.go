@@ -3,6 +3,7 @@ package user
 import (
 	"time"
 
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/api/tictactoe"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/common"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/services/auth"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
@@ -237,6 +238,22 @@ func (s *UserService) AcceptUserMatchToken(match_token string, user_token string
 
 	updated_at := time.Now()
 	if userMatch, err = s.Model.AcceptUserMatchToken(match_token, *user_id, updated_at); err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	var _tttmodel tictactoe.TicTacToeModel
+	tttmodel := _tttmodel.InitModel()
+
+	created_at := time.Now()
+	expired_at := created_at.Add(48 * time.Hour)
+	token, err := common.GenerateToken(32)
+	if err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	if err = tttmodel.CreateUserMatch(userMatch.HomeID, userMatch.AwayID, userMatch.InviteID, expired_at, created_at, token); err != nil {
 		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
 		return nil, err
 	}

@@ -12,6 +12,10 @@ type TicTacToeModel struct {
 	CreatedAt         time.Time       `json:"created_at" gorm:"column:created_at; type:timestamptz"`
 	UpdatedAt         time.Time       `json:"updated_at" gorm:"column:updated_at; type:timestamptz"`
 	DeletedAt         time.Time       `json:"deleted_at" gorm:"column:deleted_at; type:timestamptz"`
+	HomeID int `json:"home_id"`
+	HomeModelFK UserModel `gorm:"foreignKey:HomeID"`
+	AwayID int `json:"home_id"`
+	AwayModelFK UserModel `gorm:"foreignKey:AwayID"`
 }
 
 func (TicTacToeModel) TableName() string {

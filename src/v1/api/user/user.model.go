@@ -319,6 +319,7 @@ func (m *UserModel) GetUserMatch(token string, home_id int) (*UserMatchStruct, e
 			"tb_invitation.home_id",
 			"tb_invitation.away_id",
 			"tb_invitation.token",
+			"tb_invitation.id as invite_id",
 		).
 		Where("tb_invitation.token = ? AND tb_invitation.home_id = ?", token, home_id).
 		Find(&userMatch)
