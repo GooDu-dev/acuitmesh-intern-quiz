@@ -15,4 +15,7 @@ const (
 	EXCEPTION_LOG string = "EXCEPTION"
 	INFO_LOG      string = "INFO"
 	ERR_LOG       string = "ERROR"
+
+	PLAYER_X int = 1
+	PLAYER_O int = 0
 )

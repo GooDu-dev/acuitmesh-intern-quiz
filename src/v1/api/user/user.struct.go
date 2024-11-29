@@ -83,4 +83,5 @@ type UserMatchStruct struct {
 	HomeID int    `json:"home_id" gorm:"column:home_id"`
 	AwayID int    `json:"away_id" gorm:"column:away_id"`
 	Token  string `json:"token"  gorm:"column:token"`
+	InviteID int `json:"-" gorm:"column:invite_id"`
 }

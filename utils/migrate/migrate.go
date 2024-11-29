@@ -17,4 +17,5 @@ func main() {
 	database.DB.AutoMigrate(&database.HistoryModel{})
 	database.DB.AutoMigrate(&database.InvitationModel{})
 	database.DB.AutoMigrate(&database.UserTokenModel{})
+	database.DB.AutoMigrate(&database.TicTacToeModel{})
 }
