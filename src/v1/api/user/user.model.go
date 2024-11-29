@@ -144,13 +144,13 @@ func (m *UserModel) LoginUser(email string, pwd string) (*UserCard, error) {
 	return &user, nil
 }
 
-func (m *UserModel) CreateUser(email string, username string, pwd string) (*UserCard, error) {
+func (m *UserModel) CreateUser(email string, username string, pwd string, created_at time.Time) (*UserCard, error) {
 
 	user := UserCreateStruct{
 		Username:  username,
 		Email:     email,
 		Pwd:       pwd,
-		CreatedAt: time.Now(),
+		CreatedAt: created_at,
 	}
 
 	result := database.DB.Table("tb_user").
@@ -198,7 +198,7 @@ func (m *UserModel) CheckUserToken(token string) (*UserCard, error) {
 	return &userCard, nil
 }
 
-func (m *UserModel) CreateUserToken(user_id int) (*UserTokenStruct, error) {
+func (m *UserModel) CreateUserToken(user_id int, created_at time.Time) (*UserTokenStruct, error) {
 
 	tk, err := common.GenerateToken(32)
 	if err != nil {
@@ -211,6 +211,7 @@ func (m *UserModel) CreateUserToken(user_id int) (*UserTokenStruct, error) {
 		ExpiredAt: time.Now().Add(24 * time.Hour),
 		Token:     tk,
 		OnUsed:    "A",
+		CreatedAt: created_at,
 	}
 
 	result := database.DB.Table("tb_user_token").
@@ -219,6 +220,7 @@ func (m *UserModel) CreateUserToken(user_id int) (*UserTokenStruct, error) {
 			"tb_user_token.expired_at",
 			"tb_user_token.token",
 			"tb_user_token.on_used",
+			"tb_user_token.created_at",
 		).
 		Create(&token)
 
@@ -230,11 +232,14 @@ func (m *UserModel) CreateUserToken(user_id int) (*UserTokenStruct, error) {
 	return &token, nil
 }
 
-func (m *UserModel) ExpireUserToken(user_id int, token string) error {
+func (m *UserModel) ExpireUserToken(user_id int, token string, updated_at time.Time) error {
 
 	result := database.DB.Table("tb_user_token").
 		Where("tb_user_token.user_id = ? AND tb_user_token.token = ?", user_id, token).
-		Update("tb_user_token.on_used", 'N')
+		Updates(map[string]interface{}{
+			"on_used":    "N",
+			"updated_at": updated_at,
+		})
 
 	if result.Error != nil {
 		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
@@ -242,4 +247,107 @@ func (m *UserModel) ExpireUserToken(user_id int, token string) error {
 	}
 
 	return nil
+}
+
+func (m *UserModel) UserCreateInvite(home_id int, away_id int, match_token string, start time.Time, expired time.Time, created_at time.Time) (*UserInviteStruct, error) {
+
+	invitation := UserInviteStruct{
+		HomeID:      home_id,
+		AwayID:      away_id,
+		StartTime:   start,
+		ExpiredTime: expired,
+		IsAccept:    "N",
+		Token:       match_token,
+		CreatedAt:   &start,
+	}
+
+	result := database.DB.Table("tb_invitation").
+		Select(
+			"tb_invitation.start_time_stamp",
+			"tb_invitation.expired_time_stamp",
+			"tb_invitation.is_accept",
+			"tb_invitation.home_id",
+			"tb_invitation.away_id",
+			"tb_invitation.token",
+			"tb_invitation.created_at",
+		).
+		Create(&invitation)
+
+	if result.Error != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return nil, customError.InternalServerError
+	}
+
+	return &invitation, nil
+}
+
+func (m *UserModel) CheckMatchInvite(home_id int, away_id int) (*UserInviteStruct, error) {
+
+	var match UserInviteStruct
+
+	result := database.DB.Table("tb_invitation").
+		Select(
+			"tb_invitation.start_time_stamp",
+			"tb_invitation.expired_time_stamp",
+			"tb_invitation.is_accept",
+			"tb_invitation.home_id",
+			"tb_invitation.away_id",
+			"tb_invitation.token",
+			"tb_invitation.created_at",
+		).
+		Where("tb_invitation.home_id = ? AND tb_invitation.away_id = ? AND tb_invitation.is_accept = 'N'", home_id, away_id).
+		Find(&match)
+
+	if result.Error != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return nil, customError.InternalServerError
+	}
+	if err := common.DeepIsDefaultValueOrNil(match); err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	return &match, nil
+}
+
+func (m *UserModel) GetUserMatch(token string, home_id int) (*UserMatchStruct, error) {
+
+	var userMatch UserMatchStruct
+
+	result := database.DB.Table("tb_invitation").
+		Select(
+			"tb_invitation.home_id",
+			"tb_invitation.away_id",
+			"tb_invitation.token",
+		).
+		Where("tb_invitation.token = ? AND tb_invitation.home_id = ?", token, home_id).
+		Find(&userMatch)
+
+	if result.Error != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return nil, customError.InternalServerError
+	}
+
+	return &userMatch, nil
+}
+func (m *UserModel) AcceptUserMatchToken(token string, home_id int, updated_at time.Time) (*UserMatchStruct, error) {
+	result := database.DB.Table("tb_invitation").
+		Where("tb_invitation.token = ? AND tb_invitation.home_id = ?", token, home_id).
+		Updates(map[string]interface{}{
+			"is_accept":  "A",
+			"updated_at": updated_at,
+		})
+
+	if result.Error != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return nil, customError.InternalServerError
+	}
+
+	userMatch, err := m.GetUserMatch(token, home_id)
+	if err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return nil, customError.InternalServerError
+	}
+
+	return userMatch, nil
 }

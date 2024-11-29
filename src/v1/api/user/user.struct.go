@@ -1,6 +1,8 @@
 package user
 
-import "time"
+import (
+	"time"
+)
 
 type UsersListResponse struct {
 	ID       int    `json:"uid" gorm:"column:id"`
@@ -63,5 +65,22 @@ type UserTokenStruct struct {
 	UserID    int       `json:"user_id" gorm:"column:user_id"`
 	Token     string    `json:"token" gorm:"column:token"`
 	ExpiredAt time.Time `json:"expired_at" gorm:"column:expired_at"`
-	OnUsed    string    `json:"on_used" gorm:"on_used"`
+	OnUsed    string    `json:"on_used" gorm:"column:on_used"`
+	CreatedAt time.Time `json:"created_at" gorm:"column:created_at"`
+}
+
+type UserInviteStruct struct {
+	HomeID      int        `json:"home_id" gorm:"column:home_id"`
+	AwayID      int        `json:"away_id" gorm:"column:away_id"`
+	StartTime   time.Time  `json:"start" gorm:"column:start_time_stamp"`
+	ExpiredTime time.Time  `json:"expired" gorm:"column:expired_time_stamp"`
+	IsAccept    string     `json:"is_accept" gorm:"column:is_accept"`
+	Token       string     `json:"token" gorm:"column:token"`
+	CreatedAt   *time.Time `json:"-" gorm:"column:created_at"`
+}
+
+type UserMatchStruct struct {
+	HomeID int    `json:"home_id" gorm:"column:home_id"`
+	AwayID int    `json:"away_id" gorm:"column:away_id"`
+	Token  string `json:"token"  gorm:"column:token"`
 }

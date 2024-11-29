@@ -1,7 +1,10 @@
 package user
 
 import (
+	"time"
+
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/common"
+	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/services/auth"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
 	customError "github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/error"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils/log"
@@ -114,7 +117,9 @@ func (s *UserService) LoginUser(request UserLoginRequest) (userCard *UserCard, e
 
 	if common.IsDefaultValueOrNil(userCard.Token) {
 		// no token found
-		token, err := s.Model.CreateUserToken(userCard.ID)
+
+		created_at := time.Now()
+		token, err := s.Model.CreateUserToken(userCard.ID, created_at)
 		if err != nil {
 			log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
 			return nil, err
@@ -124,12 +129,15 @@ func (s *UserService) LoginUser(request UserLoginRequest) (userCard *UserCard, e
 
 	} else if common.CompareTimeIsPassed(userCard.ExpiredAt, 60*24) {
 		// token found but expired
-		err := s.Model.ExpireUserToken(userCard.ID, userCard.Token)
+		updated_at := time.Now()
+		err := s.Model.ExpireUserToken(userCard.ID, userCard.Token, updated_at)
 		if err != nil {
 			log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
 			return nil, err
 		}
-		token, err := s.Model.CreateUserToken(userCard.ID)
+
+		created_at := time.Now()
+		token, err := s.Model.CreateUserToken(userCard.ID, created_at)
 		if err != nil {
 			log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
 			return nil, err
@@ -155,10 +163,83 @@ func (s *UserService) CreateUser(request UserRegisterRequest) (userCard *UserCar
 		return nil, customError.InternalServerError
 	}
 
-	if userCard, err = s.Model.CreateUser(request.Email, request.Username, pwd); err != nil {
+	created_at := time.Now()
+	if userCard, err = s.Model.CreateUser(request.Email, request.Username, pwd, created_at); err != nil {
 		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
 		return nil, err
 	}
 
 	return userCard, nil
+}
+
+func (s *UserService) UserCreateInvite(home_token string, away_id int, created_at time.Time) (match *UserInviteStruct, err error) {
+
+	home_id, err := auth.GetService().AuthorizeToken(home_token)
+	if err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	if match, err = s.Model.CheckMatchInvite(*home_id, away_id); err == nil {
+		// already have invited
+		log.Logging(utils.INFO_LOG, common.GetFunctionWithPackageName(), map[string]interface{}{"match": match})
+		return match, nil
+	}
+
+	match_token, err := common.GenerateToken(32)
+	if err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	start := time.Now()
+	expired := start.Add(24 * time.Hour)
+
+	if match, err = s.Model.UserCreateInvite(*home_id, away_id, match_token, start, expired, created_at); err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	log.Logging(utils.INFO_LOG, common.GetFunctionWithPackageName(), map[string]interface{}{"match": match})
+	return match, nil
+}
+
+func (s *UserService) GetUserMatchURL(home_token string, away_id int) (userMatch *UserMatchStruct, err error) {
+
+	home_id, err := auth.GetService().AuthorizeToken(home_token)
+	if err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	var matchInvite *UserInviteStruct
+	if matchInvite, err = s.Model.CheckMatchInvite(*home_id, away_id); err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	userMatch = &UserMatchStruct{
+		HomeID: matchInvite.HomeID,
+		AwayID: matchInvite.AwayID,
+		Token:  matchInvite.Token,
+	}
+
+	return userMatch, nil
+
+}
+
+func (s *UserService) AcceptUserMatchToken(match_token string, user_token string) (userMatch *UserMatchStruct, err error) {
+	user_id, err := auth.GetService().AuthorizeToken(user_token)
+	if err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	updated_at := time.Now()
+	if userMatch, err = s.Model.AcceptUserMatchToken(match_token, *user_id, updated_at); err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return nil, err
+	}
+
+	return userMatch, nil
 }
