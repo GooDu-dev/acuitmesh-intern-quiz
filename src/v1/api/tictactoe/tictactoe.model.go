@@ -180,3 +180,49 @@ func (m *TicTacToeModel) UpdateBoardData(old_token string, new_token string, boa
 
 	return nil
 }
+
+func (m *TicTacToeModel) AddScoreToUserStat(user_id int, win int, lose int, draw int, total int) error {
+
+	user_stat, err := m.GetUserStatistic(user_id)
+	if err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return err
+	}
+
+	result := database.DB.Table("tb_tictactoe").
+		Where("tb_user.user_id = ?", user_id).
+		Updates(map[string]interface{}{
+			"win":   user_stat.Win + win,
+			"lose":  user_stat.Lose + lose,
+			"draw":  user_stat.Draw + draw,
+			"total": user_stat.Total + total,
+		})
+
+	if result.Error != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return customError.InternalServerError
+	}
+
+	return nil
+}
+
+func (m *TicTacToeModel) GetUserStatistic(id int) (*UserStatistic, error) {
+	var response UserStatistic
+
+	result := database.DB.Table("tb_user").
+		Select(
+			"tb_user.win",
+			"tb_user.lose",
+			"tb_user.draw",
+			"tb_user.total",
+		).
+		Where("tb_user.id = ?", id).
+		First(&response)
+
+	if result.Error != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), result.Error)
+		return nil, customError.InternalServerError
+	}
+
+	return &response, nil
+}

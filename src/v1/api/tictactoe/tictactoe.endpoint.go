@@ -53,9 +53,25 @@ func (e *TicTacToeEndpoint) GetUserMatchInfo(c *gin.Context) {
 	tttService := tictactoe.TicTacToeService{}
 	if w := tttService.CheckWinner(matchInfo.Board.Data); w != 0 {
 		if w == utils.PLAYER_O {
+			err = e.Service.AddScoreToUserStat(matchInfo.AwayPlayer.ID, 1, 0, 0, 1)
+			if err != nil {
+				log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+			}
+			err = e.Service.AddScoreToUserStat(matchInfo.HomePlayer.ID, 0, 1, 0, 1)
+			if err != nil {
+				log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+			}
 			c.JSON(http.StatusOK, matchInfo.AwayPlayer)
 			return
 		} else {
+			err = e.Service.AddScoreToUserStat(matchInfo.HomePlayer.ID, 0, 1, 0, 1)
+			if err != nil {
+				log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+			}
+			err = e.Service.AddScoreToUserStat(matchInfo.AwayPlayer.ID, 1, 0, 0, 1)
+			if err != nil {
+				log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+			}
 			c.JSON(http.StatusOK, matchInfo.HomePlayer)
 			return
 		}
