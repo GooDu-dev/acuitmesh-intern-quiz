@@ -1,6 +1,8 @@
 package middlewares
 
 import (
+	"time"
+
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/api/user"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/common"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
@@ -15,12 +17,6 @@ func NoValidation(context *gin.Context) {
 
 func AuthValidator(context *gin.Context) {
 	token, err := context.Cookie("auth-token")
-	log.Logging(utils.INFO_LOG, common.GetFunctionWithPackageName(),
-		map[string]interface{}{
-			"token":   token,
-			"err":     err,
-			"cookies": context.Request.Header,
-		})
 	if err != nil {
 		status, res := customError.InvalidHeaderNotAcceptableError.ErrorResponse()
 		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err.Error())
@@ -46,7 +42,8 @@ func AuthValidator(context *gin.Context) {
 		return
 	}
 	if common.CompareTimeIsPassed(userCard.ExpiredAt, 60*24) {
-		err := userModel.ExpireUserToken(userCard.ID, userCard.Token)
+		updated_at := time.Now()
+		err := userModel.ExpireUserToken(userCard.ID, userCard.Token, updated_at)
 		if err != nil {
 			status, res := customError.GetErrorResponse(err)
 			log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)

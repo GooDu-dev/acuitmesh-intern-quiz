@@ -3,6 +3,7 @@ package user
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/src/v1/common"
 	"github.com/GooDu-Dev/acuitmesh-intern-quiz/utils"
@@ -136,5 +137,80 @@ func (e *UserEndpoint) CreateUser(c *gin.Context) {
 		return
 	}
 
+	log.Logging(utils.INFO_LOG, common.GetFunctionWithPackageName(), *response)
 	c.JSON(http.StatusCreated, *response)
+}
+
+func (e *UserEndpoint) UserCreateInvite(c *gin.Context) {
+
+	away := c.Query("away")
+	var away_id int
+	var err error
+	if away_id, err = strconv.Atoi(away); err != nil {
+		status, res := customError.InvalidRequestError.ErrorResponse()
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		c.JSON(status, res)
+		return
+	}
+
+	home_tk, err := c.Cookie("auth-token")
+	if err != nil {
+		status, res := customError.InternalServerError.ErrorResponse()
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		c.JSON(status, res)
+		return
+	}
+
+	created_at := time.Now()
+
+	var match *UserInviteStruct
+	if match, err = e.Service.UserCreateInvite(home_tk, away_id, created_at); err != nil {
+		status, res := customError.GetErrorResponse(err)
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		c.JSON(status, res)
+		return
+	}
+
+	// ! Alert user about the challenge
+	// ms := mail.MailService{}
+	// mailService := ms.InitService()
+	// if err := mailService.SendInvite(match.HomeID, match.AwayID, match.Token); err != nil {
+	// 	status, res := customError.GetErrorResponse(err)
+	// 	log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+	// 	c.JSON(status, res)
+	// 	return
+	// }
+
+	log.Logging(utils.INFO_LOG, common.GetFunctionWithPackageName(), *match)
+	c.JSON(http.StatusCreated, *match)
+}
+
+func (e *UserEndpoint) AcceptUserInvite(c *gin.Context) {
+	match := c.Query("match")
+	if common.IsDefaultValueOrNil(match) {
+		status, res := customError.MissingRequestError.ErrorResponse()
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), "match token is missing.")
+		c.JSON(status, res)
+		return
+	}
+
+	home_token, err := c.Cookie("auth-token")
+	if err != nil {
+		status, res := customError.MissingRequestError.ErrorResponse()
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		c.JSON(status, res)
+		return
+	}
+
+	var userMatch *UserMatchStruct
+	if userMatch, err = e.Service.AcceptUserMatchToken(match, home_token); err != nil {
+		status, res := customError.GetErrorResponse(err)
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		c.JSON(status, res)
+		return
+	}
+
+	log.Logging(utils.INFO_LOG, common.GetFunctionWithPackageName(), userMatch)
+	c.JSON(http.StatusOK, userMatch)
+
 }

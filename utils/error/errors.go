@@ -123,6 +123,7 @@ var (
 	UserNotFoundError           CustomError = New("user_not_found")
 	UserAccountDupplicatedError CustomError = New("user_account_dupplicated")
 	UserTokenExpiredError       CustomError = New("user_token_expired_error")
+	UserAuthorizeFailError      CustomError = New("user_authorize_fail_error")
 )
 var ErrorCode = map[error]string{
 	// Normal - 1
@@ -145,6 +146,7 @@ var ErrorCode = map[error]string{
 	UserNotFoundError:           "20000",
 	UserAccountDupplicatedError: "20001",
 	UserTokenExpiredError:       "20002",
+	UserAuthorizeFailError:      "20003",
 }
 var ErrorThMessage = map[error]string{
 	// Normarl - 1
@@ -167,6 +169,7 @@ var ErrorThMessage = map[error]string{
 	UserNotFoundError:           "ไม่พบรายชื่อบัญชีผู้ใช้, โปรดลองใหม่อีกครั้ง",
 	UserAccountDupplicatedError: "ชื่อผู้ใช้หรืออีเมลได้ถูกลงทะเบียนไว้แล้ว, กรุณาลองใหม่อีกครั้ง",
 	UserTokenExpiredError:       "โทเคนของผู้ใช้หมดอายุ, กรุณาลงทะเบียนใหม่อีกครั้ง",
+	UserAuthorizeFailError:      "เกิดข้อผิดผลาดในการยืนยันตัวตน, กรุณาลงทะเบียนใหม่อีกครั้ง",
 }
 var ErrorEnMessage = map[error]string{
 	// Normal - 1
@@ -189,6 +192,7 @@ var ErrorEnMessage = map[error]string{
 	UserNotFoundError:           "An account is not found, please try again later",
 	UserAccountDupplicatedError: "An username or email is already used, please try again later",
 	UserTokenExpiredError:       "User token is expired, please login again later",
+	UserAuthorizeFailError:      "Authorization failed, please login again later",
 }
 var HttpStatusCodes = map[error]int{
 	// Normal - 1
@@ -211,4 +215,5 @@ var HttpStatusCodes = map[error]int{
 	UserNotFoundError:           404,
 	UserAccountDupplicatedError: 400,
 	UserTokenExpiredError:       401,
+	UserAuthorizeFailError:      401,
 }

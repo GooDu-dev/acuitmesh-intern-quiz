@@ -82,6 +82,22 @@ func (r Router) InitRouter() http.Handler {
 			Validation:  validator.NoValidation,
 			Endpoint:    userEndpoint.CreateUser,
 		},
+		{
+			Name:        "[GET] Send invite to user",
+			Description: "send invite to others player with his/her token",
+			Method:      http.MethodGet,
+			Path:        "/user/invite",
+			Validation:  validator.AuthValidator,
+			Endpoint:    userEndpoint.UserCreateInvite,
+		},
+		{
+			Name:        "[GET] Accept the invitation",
+			Description: "Accept the invitation via invitation token",
+			Method:      http.MethodGet,
+			Path:        "/user/invite/accept",
+			Validation:  validator.AuthValidator,
+			Endpoint:    userEndpoint.AcceptUserInvite,
+		},
 	}
 
 	ro := gin.Default()
