@@ -81,3 +81,13 @@ func (s *TicTacToeService) SetXOToBoard(token string, index int, mark string) (b
 	return board, nil
 
 }
+
+func (s *TicTacToeService) AddScoreToUserStat(user_id int, win int, lose int, draw int, total int) (err error) {
+
+	if err = s.Model.AddScoreToUserStat(user_id, win, lose, draw, total); err != nil {
+		log.Logging(utils.EXCEPTION_LOG, common.GetFunctionWithPackageName(), err)
+		return err
+	}
+
+	return nil
+}
